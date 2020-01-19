@@ -1,6 +1,7 @@
 package com.wildcodeschool.wildandwizard.repository;
 
 import com.wildcodeschool.wildandwizard.entity.Wizard;
+import com.wildcodeschool.wildandwizard.util.JdbcUtils;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -14,13 +15,17 @@ public class WizardRepository implements CrudDao<Wizard> {
 
     @Override
     public Wizard save(Wizard wizard) {
+
+		Connection connection = null;
+		PreparedStatement statement = null;
+		ResultSet generatedKeys = null;
         try {
-            Connection connection = DriverManager.getConnection(
-                    DB_URL, DB_USER, DB_PASSWORD
+            connection = DriverManager.getConnection(
+            		DB_URL, DB_USER, DB_PASSWORD
             );
-            PreparedStatement statement = connection.prepareStatement(
-                    "INSERT INTO wizard (first_name, last_name, birthday, birth_place, biography, is_muggle) VALUES (?, ?, ?, ?, ?, ?)",
-                    Statement.RETURN_GENERATED_KEYS
+            statement = connection.prepareStatement(
+            		"INSERT INTO wizard (first_name, last_name, birthday, birth_place, biography, is_muggle) VALUES (?, ?, ?, ?, ?, ?)",
+            		Statement.RETURN_GENERATED_KEYS
             );
             statement.setString(1, wizard.getFirstName());
             statement.setString(2, wizard.getLastName());
@@ -33,7 +38,7 @@ public class WizardRepository implements CrudDao<Wizard> {
                 throw new SQLException("failed to insert data");
             }
 
-            ResultSet generatedKeys = statement.getGeneratedKeys();
+            generatedKeys = statement.getGeneratedKeys();
 
             if (generatedKeys.next()) {
                 Long id = generatedKeys.getLong(1);
@@ -44,22 +49,29 @@ public class WizardRepository implements CrudDao<Wizard> {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        }
+		} finally {
+			JdbcUtils.closeResultSet(generatedKeys);
+			JdbcUtils.closeStatement(statement);
+			JdbcUtils.closeConnection(connection);
+		}
         return null;
     }
 
     @Override
     public Wizard findById(Long id) {
 
+		Connection connection = null;
+		PreparedStatement statement = null;
+		ResultSet resultSet = null;
         try {
-            Connection connection = DriverManager.getConnection(
+            connection = DriverManager.getConnection(
                     DB_URL, DB_USER, DB_PASSWORD
             );
-            PreparedStatement statement = connection.prepareStatement(
+            statement = connection.prepareStatement(
                     "SELECT * FROM wizard WHERE id = ?;"
             );
             statement.setLong(1, id);
-            ResultSet resultSet = statement.executeQuery();
+            resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
                 String firstName = resultSet.getString("first_name");
@@ -72,21 +84,28 @@ public class WizardRepository implements CrudDao<Wizard> {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        }
+		} finally {
+			JdbcUtils.closeResultSet(resultSet);
+			JdbcUtils.closeStatement(statement);
+			JdbcUtils.closeConnection(connection);
+		}
         return null;
     }
 
     @Override
     public List<Wizard> findAll() {
 
+		Connection connection = null;
+		PreparedStatement statement = null;
+		ResultSet resultSet = null;
         try {
-            Connection connection = DriverManager.getConnection(
+            connection = DriverManager.getConnection(
                     DB_URL, DB_USER, DB_PASSWORD
             );
-            PreparedStatement statement = connection.prepareStatement(
+            statement = connection.prepareStatement(
                     "SELECT * FROM wizard;"
             );
-            ResultSet resultSet = statement.executeQuery();
+            resultSet = statement.executeQuery();
 
             List<Wizard> wizards = new ArrayList<>();
 
@@ -103,17 +122,23 @@ public class WizardRepository implements CrudDao<Wizard> {
             return wizards;
         } catch (SQLException e) {
             e.printStackTrace();
-        }
+		} finally {
+			JdbcUtils.closeResultSet(resultSet);
+			JdbcUtils.closeStatement(statement);
+			JdbcUtils.closeConnection(connection);
+		}
         return null;
     }
 
     @Override
     public Wizard update(Wizard wizard) {
+		Connection connection = null;
+		PreparedStatement statement = null;
         try {
-            Connection connection = DriverManager.getConnection(
+            connection = DriverManager.getConnection(
                     DB_URL, DB_USER, DB_PASSWORD
             );
-            PreparedStatement statement = connection.prepareStatement(
+            statement = connection.prepareStatement(
                     "UPDATE wizard SET first_name=?, last_name=?, birthday=?, birth_place=?, biography=?, is_muggle=? WHERE id=?"
             );
             statement.setString(1, wizard.getFirstName());
@@ -131,16 +156,22 @@ public class WizardRepository implements CrudDao<Wizard> {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+		finally {
+			JdbcUtils.closeStatement(statement);
+			JdbcUtils.closeConnection(connection);
+		}
         return null;
     }
 
     @Override
     public void deleteById(Long id) {
+		Connection connection = null;
+		PreparedStatement statement = null;
         try {
-            Connection connection = DriverManager.getConnection(
+            connection = DriverManager.getConnection(
                     DB_URL, DB_USER, DB_PASSWORD
             );
-            PreparedStatement statement = connection.prepareStatement(
+            statement = connection.prepareStatement(
                     "DELETE FROM wizard WHERE id=?"
             );
             statement.setLong(1, id);
@@ -151,5 +182,9 @@ public class WizardRepository implements CrudDao<Wizard> {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+		finally {
+			JdbcUtils.closeStatement(statement);
+			JdbcUtils.closeConnection(connection);
+		}
     }
 }
