@@ -15,7 +15,6 @@ public class WizardRepository implements CrudDao<Wizard> {
 
     @Override
     public Wizard save(Wizard wizard) {
-
 		Connection connection = null;
 		PreparedStatement statement = null;
 		ResultSet generatedKeys = null;
@@ -59,7 +58,6 @@ public class WizardRepository implements CrudDao<Wizard> {
 
     @Override
     public Wizard findById(Long id) {
-
 		Connection connection = null;
 		PreparedStatement statement = null;
 		ResultSet resultSet = null;
@@ -94,7 +92,6 @@ public class WizardRepository implements CrudDao<Wizard> {
 
     @Override
     public List<Wizard> findAll() {
-
 		Connection connection = null;
 		PreparedStatement statement = null;
 		ResultSet resultSet = null;
